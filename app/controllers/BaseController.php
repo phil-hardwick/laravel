@@ -2,6 +2,8 @@
 
 class BaseController extends Controller {
 
+	protected $appName = "com.nexanapps.Nexus-Hub";
+
 	/**
 	 * Setup the layout used by the controller.
 	 *

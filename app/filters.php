@@ -33,15 +33,44 @@ App::after(function($request, $response)
 |
 */
 
-Route::filter('auth', function()
+Route::filter('authUser', function()
 {
-	if (Auth::guest()) return Redirect::guest('login');
+		$user = User::where('api_key', '=', Input::get('api_key'))->first();
+		if($user == null) 
+		{
+				Log::warning('Access attempt from unknown user, api key used: ' . Input::get('api_key'));
+        return Response::make('', 404);
+		}
+		if ($user->is_authenticated == false)
+    {
+    		Log::warning('Access attempt from deauthenticated device, user: ' . $user->toJson());
+        return Response::make('', 404);
+    }
 });
 
 
-Route::filter('auth.basic', function()
+Route::filter('authStaff', function()
 {
-	return Auth::basic();
+		$user = User::where('api_key', '=', Input::get('api_key'))->firstOrFail();
+		$userRoles = $user->roles;
+		$studentRole = Role::where('role_name', '=', 'Student')->first();
+		if ($userRoles->contains($studentRole->id))
+    {
+    		Log::warning('Access to staff regulated area attempt from user who does not have permission: ' . $user->toJson());
+        return Response::make('', 404);
+    }
+});
+
+Route::filter('authAdmin', function()
+{
+		$userRoles = User::where('api_key', '=', Input::get('api_key'))->firstOrFail()->roles;
+		$adminRole = Role::where('role_name', '=', 'Admin')->first();
+		//filter authUser
+		if (!$userRoles->contains($adminRole->id))
+    {
+    		Log::warning('Access to admin regulated area attempt from user who does not have permission: ' . $user->toJson());
+        return Response::make('', 404);
+    }
 });
 
 /*
@@ -54,11 +83,6 @@ Route::filter('auth.basic', function()
 | response will be issued if they are, which you may freely change.
 |
 */
-
-Route::filter('guest', function()
-{
-	if (Auth::check()) return Redirect::to('/');
-});
 
 /*
 |--------------------------------------------------------------------------

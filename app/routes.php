@@ -11,7 +11,17 @@
 |
 */
 
-Route::get('/', function()
+Route::controller('register-device', 'DeviceRegisterController');
+
+Route::group(array('before' => 'authUser|authStaff'), function()
 {
-	return View::make('hello');
+		Route::controller('year', 'YearController');
+
+		Route::controller('nexus-class', 'NexusClassController');
+
+		Route::controller('student', 'StudentController');
+
+		Route::controller('register', 'RegisterController');
 });
+
+

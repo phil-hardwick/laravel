@@ -1,4 +1,5 @@
 /bootstrap/compiled.php
+/app/apns/ApnsPHP/certificates
 /vendor
 composer.phar
 composer.lock
